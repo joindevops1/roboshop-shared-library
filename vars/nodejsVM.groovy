@@ -1,4 +1,5 @@
-pipeline {
+def call(Map configMap){
+     pipeline {
     agent {
         node {
             label 'AGENT-2'
@@ -113,4 +114,5 @@ pipeline {
             echo 'I will say Hello when pipeline is success'
         }
     }
+}
 }
