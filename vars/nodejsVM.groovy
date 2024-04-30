@@ -7,8 +7,8 @@ def call(Map configMap){
         }
         environment { 
             packageVersion = ''
-            // can maintain in pipeline golbals
-            // nexusURL = '172.31.29.138:8081'
+            // can maintain in pipeline globals
+            //nexusURL = '172.31.29.138:8081'
         }
         options {
             timeout(time: 1, unit: 'HOURS')
@@ -53,7 +53,8 @@ def call(Map configMap){
             stage('Sonar Scan'){
                 steps{
                     sh """
-                        sonar-scanner
+                        echo "usually command here is sonar-scanner"
+                        echo "sonar scan will run here"
                     """
                 }
             }
@@ -71,7 +72,7 @@ def call(Map configMap){
                     nexusArtifactUploader(
                         nexusVersion: 'nexus3',
                         protocol: 'http',
-                        nexusUrl: "pipelineGlobals.nexusURL()",
+                        nexusUrl: pipelineGlobals.nexusURL(),
                         groupId: 'com.roboshop',
                         version: "${packageVersion}",
                         repository: "${configMap.component}",
@@ -88,7 +89,7 @@ def call(Map configMap){
             stage('Deploy') {
                 when {
                     expression{
-                        params.Deploy == 'true'
+                        params.Deploy
                     }
                 }
                 steps {
@@ -96,8 +97,9 @@ def call(Map configMap){
                             def params = [
                                 string(name: 'version', value: "$packageVersion"),
                                 string(name: 'environment', value: "dev")
+                                booleanParam(name: 'Create', value: "${params.Deploy}")
                             ]
-                            build job: "${configMap.component}-deploy", wait: true, parameters: params
+                            build job: "../${configMap.component}-deploy", wait: true, parameters: params
                         }
                 }
             }
